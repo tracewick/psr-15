@@ -1,0 +1,46 @@
+{
+    "name": "tracewick/psr-15",
+    "description": "PSR-15 middleware for profiling PHP HTTP requests with Tracewick.",
+    "license": "Apache-2.0",
+    "type": "library",
+    "require": {
+        "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+        "psr/http-message": "^1.0 || ^2.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0",
+        "tracewick/tracewick": "^1.0.0-RC1"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.89",
+        "nyholm/psr7": "^1.8",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.5",
+        "rector/rector": "^2.2"
+    },
+    "suggest": {
+        "ext-excimer": "Collects samples. Without it, profiling is a no-op."
+    },
+    "autoload": {
+        "psr-4": {
+            "Tracewick\\Bridge\\Psr15\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "prefer-stable": true,
+    "scripts": {
+        "ci": [
+            "@composer validate --strict",
+            "@cs:check",
+            "@rector:check",
+            "@stan",
+            "@test"
+        ],
+        "cs:check": "php-cs-fixer check --diff",
+        "rector:check": "rector process --dry-run",
+        "stan": "phpstan analyse --no-progress",
+        "test": "phpunit",
+        "test:integration": "phpunit --testsuite integration"
+    }
+}
