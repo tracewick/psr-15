@@ -117,6 +117,25 @@ The smoke test uses one worker on `127.0.0.1:17850`. It checks that the same
 profiler handles a success, an exception, a 404, and a subsequent success. It
 verifies post-response flush, isolated route labels, and graceful shutdown.
 
+### FrankenPHP worker mode
+
+The [FrankenPHP example](https://github.com/tracewick/psr-15/tree/develop/examples/frankenphp)
+creates one profiler per worker script. FrankenPHP serves sequential requests
+on that worker, and each worker thread has its own profiler. After emitting
+the PSR-7 response, the handler calls `frankenphp_finish_request()`. The worker
+flushes the stopped profile to the local spool after `frankenphp_handle_request()` returns.
+
+From a Git checkout with Docker, Composer and `curl`, run the smoke test:
+
+```bash
+composer install --working-dir=examples/frankenphp
+bash examples/frankenphp/smoke.sh
+```
+
+The test builds FrankenPHP 1.14.0 with PHP 8.5 ZTS and Excimer 1.2.7. It verifies
+that the client receives a response before the spool write is released. It also
+checks request recovery after an exception, route isolation and graceful shutdown.
+
 ## Development
 
 Run `composer update` and `composer ci`. The integration suite verifies

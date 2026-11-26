@@ -69,26 +69,4 @@ wait "$server_pid"
 server_pid=
 test "$(cat "$TRACEWICK_SPOOL_DIR/worker-stopped")" = "$worker_pid"
 
-php <<'PHP'
-<?php
-
-require 'vendor/autoload.php';
-
-$directory = getenv('TRACEWICK_SPOOL_DIR');
-$files = glob($directory . '/*/*.spool');
-$profiles = [];
-foreach ($files as $file) {
-    $profile = Tracewick\Sink\SpoolFile::fromBytes(file_get_contents($file));
-    if ($profile->application !== 'tracewick-roadrunner' || $profile->payload === '') {
-        throw new RuntimeException('Invalid RoadRunner spool profile.');
-    }
-    $profiles[] = $profile;
-}
-usort($profiles, static fn($left, $right): int => $left->startNs <=> $right->startNs);
-$labels = array_map(static fn($profile): array => $profile->labels, $profiles);
-if ($labels !== [['route' => 'items.show'], ['route' => 'items.failed'], [], ['route' => 'health.show']]) {
-    throw new RuntimeException('Unexpected route labels: ' . json_encode($labels));
-}
-
-echo "Verified four isolated profiles and graceful worker shutdown.\n";
-PHP
+php ../assert-worker-spool.php "$TRACEWICK_SPOOL_DIR" tracewick-roadrunner
