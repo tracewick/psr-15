@@ -76,13 +76,13 @@ their own lifecycle wiring.
 
 ### RoadRunner
 
-The [sequential worker example](examples/roadrunner/worker.php) creates one
+The [sequential worker example](https://github.com/tracewick/psr-15/tree/develop/examples/roadrunner) creates one
 profiler and middleware per PHP worker. The middleware ends sampling when the
 handler returns or throws. The worker emits the PSR-7 response with
 `PSR7Worker::respond()` and then flushes to the local spool in `finally`.
 Register the profiler's shutdown callback once per worker as a fallback.
 
-From this checkout, with RoadRunner 2025.1.15 and PHP with Excimer and sockets
+From a Git checkout, with RoadRunner 2025.1.15 and PHP with Excimer and sockets
 installed, run the example's HTTP smoke test:
 
 ```bash
