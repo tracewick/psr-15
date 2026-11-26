@@ -1,0 +1,14 @@
+version: '3'
+
+server:
+  command: php worker.php
+  relay: pipes
+
+http:
+  address: 127.0.0.1:17850
+  pool:
+    num_workers: 1
+
+logs:
+  mode: production
+  level: warn
