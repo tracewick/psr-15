@@ -104,3 +104,29 @@ jobs:
       - uses: ramsey/composer-install@v4
       - run: php --ri excimer
       - run: composer test:integration
+
+  roadrunner:
+    name: RoadRunner worker smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          extensions: excimer, sockets
+          tools: composer:v2
+      - name: Install RoadRunner 2025.1.15
+        working-directory: ${{ runner.temp }}
+        run: |
+          archive=roadrunner-2025.1.15-linux-amd64.tar.gz
+          curl --fail --silent --show-error --location --retry 3 \
+            "https://github.com/roadrunner-server/roadrunner/releases/download/v2025.1.15/$archive" \
+            --output "$archive"
+          echo "74589ff95e022dddf163f9316821cb80423a7db9865e96ce30a436d6898e34e7  $archive" | sha256sum --check
+          tar -xzf "$archive" --strip-components=1 roadrunner-2025.1.15-linux-amd64/rr
+      - run: composer install --working-dir=examples/roadrunner --no-interaction --prefer-dist
+      - run: bash examples/roadrunner/smoke.sh
+        env:
+          ROADRUNNER_BINARY: ${{ runner.temp }}/rr

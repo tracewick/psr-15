@@ -74,6 +74,26 @@ long-lived sequential worker, initialize the middleware and profiler once per
 worker after it starts. Concurrent runtimes need a process-level profiler and
 their own lifecycle wiring.
 
+### RoadRunner
+
+The [sequential worker example](https://github.com/tracewick/psr-15/tree/develop/examples/roadrunner) creates one
+profiler and middleware per PHP worker. The middleware ends sampling when the
+handler returns or throws. The worker emits the PSR-7 response with
+`PSR7Worker::respond()` and then flushes to the local spool in `finally`.
+Register the profiler's shutdown callback once per worker as a fallback.
+
+From a Git checkout, with RoadRunner 2025.1.15 and PHP with Excimer and sockets
+installed, run the example's HTTP smoke test:
+
+```bash
+composer install --working-dir=examples/roadrunner
+ROADRUNNER_BINARY=/path/to/rr bash examples/roadrunner/smoke.sh
+```
+
+The smoke test uses one worker on `127.0.0.1:17850`. It checks that the same
+profiler handles a success, an exception, a 404, and a subsequent success. It
+verifies post-response flush, isolated route labels, and graceful shutdown.
+
 ## Development
 
 Run `composer update` and `composer ci`. The integration suite verifies
