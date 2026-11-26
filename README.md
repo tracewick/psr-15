@@ -78,3 +78,7 @@ their own lifecycle wiring.
 
 Run `composer update` and `composer ci`. The integration suite verifies
 spool output when the Excimer extension is loaded.
+
+On PHP 8.5 with Excimer and PCOV enabled, use `composer test:coverage` to generate
+the Clover report. Install Infection 0.35.8 and run `composer infection` for mutation
+tests. CI enforces 80% of all mutations and 80% of covered mutations.

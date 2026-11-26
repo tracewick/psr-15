@@ -29,6 +29,44 @@ jobs:
       - uses: ramsey/composer-install@v4
       - run: composer ci
 
+  coverage:
+    name: Coverage upload (Codecov)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: excimer
+          coverage: pcov
+          tools: composer:v2
+      - uses: ramsey/composer-install@v4
+      - run: composer test:coverage
+      - uses: codecov/codecov-action@v7
+        with:
+          files: build/coverage/clover.xml
+          use_oidc: true
+          fail_ci_if_error: true
+
+  mutation:
+    name: Mutation testing (Infection)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: excimer
+          coverage: pcov
+          tools: composer:v2, infection:0.35.8
+      - uses: ramsey/composer-install@v4
+      - run: composer infection
+
   matrix:
     name: Tests (PHP ${{ matrix.php }}, ${{ matrix.dependencies }})
     runs-on: ubuntu-latest

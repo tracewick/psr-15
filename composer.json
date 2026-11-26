@@ -38,9 +38,15 @@
             "@test"
         ],
         "cs:check": "php-cs-fixer check --diff",
+        "infection": [
+            "@test:coverage",
+            "@infection:ci"
+        ],
+        "infection:ci": "infection --coverage=build/coverage --skip-initial-tests --threads=2 --show-mutations",
         "rector:check": "rector process --dry-run",
         "stan": "phpstan analyse --no-progress",
         "test": "phpunit",
+        "test:coverage": "phpunit --coverage-clover build/coverage/clover.xml --coverage-xml build/coverage/coverage-xml --log-junit build/coverage/junit.xml",
         "test:integration": "phpunit --testsuite integration"
     }
 }

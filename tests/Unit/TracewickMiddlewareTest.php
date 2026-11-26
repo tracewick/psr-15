@@ -7,10 +7,12 @@ namespace Tracewick\Bridge\Psr15\Tests\Unit;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Tracewick\Bridge\Psr15\TracewickMiddleware;
+use Tracewick\Profile\Labels;
 use Tracewick\Profile\Profile;
 use Tracewick\Runtime\ProfilerConfig;
 use Tracewick\Runtime\UnitOfWorkProfiler;
@@ -160,6 +162,52 @@ final class TracewickMiddlewareTest extends TestCase
         self::assertSame(1, $profiler->bufferedProfiles());
         $profiler->flush();
         self::assertSame(0, $profiler->bufferedProfiles());
+    }
+
+    #[TestWith([null])]
+    #[TestWith([''])]
+    public function testMissingRouteKeepsConfiguredLabels(?string $route): void
+    {
+        $sink = $this->createMock(Sink::class);
+        $labels = [];
+        $sink->expects(self::once())->method('send')->willReturnCallback(
+            static function (Profile $profile) use (&$labels): Delivery {
+                $labels = $profile->labels->toArray();
+
+                return Delivery::delivered();
+            },
+        );
+        $config = new ProfilerConfig(new Labels(['route' => 'fallback']), sampleRate: 1.0);
+        $profiler = new UnitOfWorkProfiler($this->sampler(), $sink, $config);
+        $middleware = new TracewickMiddleware($profiler, static fn(): ?string => $route);
+        $handler = $this->createStub(RequestHandlerInterface::class);
+        $handler->method('handle')->willReturn(new Response());
+
+        $middleware->process(new ServerRequest('GET', '/'), $handler);
+
+        self::assertSame(['route' => 'fallback'], $labels);
+        self::assertNull($profiler->lastFailure());
+    }
+
+    public function testReentryDuringFlushOnlyRunsTheNestedHandler(): void
+    {
+        $request = new ServerRequest('GET', '/');
+        $response = new Response();
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects(self::exactly(2))->method('handle')->willReturn($response);
+        $sink = $this->createMock(Sink::class);
+        $profiler = new UnitOfWorkProfiler($this->sampler(), $sink, new ProfilerConfig(sampleRate: 1.0));
+        $middleware = new TracewickMiddleware($profiler);
+        $sink->expects(self::once())->method('send')->willReturnCallback(
+            static function () use ($middleware, $request, $handler): Delivery {
+                $middleware->process($request, $handler);
+
+                return Delivery::delivered();
+            },
+        );
+
+        self::assertSame($response, $middleware->process($request, $handler));
+        self::assertNull($profiler->lastFailure());
     }
 
     private function sampler(int $requests = 1): Sampler
