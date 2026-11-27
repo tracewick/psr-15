@@ -12,6 +12,10 @@ The spool factory uses the core's local spool sink and sampling defaults.
 Flush after the handler by default. Applications with a post-response hook
 can turn off the inline flush and call the shared profiler after emission.
 
+For FrankenPHP, the worker script owns its profiler for the lifetime of the
+worker thread. The request callback uses `frankenphp_finish_request()` to finish
+the response. The worker loop flushes after `frankenphp_handle_request()` returns.
+
 A route resolver reads the request received by this middleware. Applications
 can run the middleware after routing to use the matched route name or template.
 An absent or failing resolver leaves the base labels in place.

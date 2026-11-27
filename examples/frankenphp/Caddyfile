@@ -1,0 +1,17 @@
+{
+	admin off
+	auto_https off
+	frankenphp {
+		num_threads 2
+		worker {
+			file /app/examples/frankenphp/index.php
+			num 1
+		}
+	}
+}
+
+http://:8080 {
+	root * /app/examples/frankenphp
+	respond /__ready 204
+	php_server
+}
