@@ -12,9 +12,15 @@ Your application provides its PSR-7 implementation. Install
 [Excimer](https://www.mediawiki.org/wiki/Excimer) to collect profiles. Requests
 continue to work without it.
 
-Once this bridge is tagged and published, install the bridge and core together.
-When using a core release candidate with `minimum-stability: stable`, opt in to
-that version explicitly in your application's Composer command.
+After the first RC is available on Packagist, install the bridge and core together:
+
+```sh
+composer require tracewick/psr-15:1.0.0-rc.1 tracewick/tracewick:1.0.0-rc.1
+```
+
+These exact versions opt in to both release candidates with Composer's default
+`minimum-stability: stable`. To verify the assets attached to a GitHub Release,
+see [Release SBOMs and signatures](https://github.com/tracewick/psr-15/blob/main/docs/verify-release.md).
 
 ## Usage
 
@@ -135,6 +141,14 @@ bash examples/frankenphp/smoke.sh
 The test builds FrankenPHP 1.14.0 with PHP 8.5 ZTS and Excimer 1.2.7. It verifies
 that the client receives a response before the spool write is released. It also
 checks request recovery after an exception, route isolation and graceful shutdown.
+
+## Worker benchmarks
+
+The [HTTP adapter overhead report](https://github.com/tracewick/benchmarks/blob/main/reports/2026-11-27-adapter-http-overhead.md)
+covers RoadRunner 2025.1.15, FrankenPHP 1.14.0 worker mode and Swoole 6.3.0
+with PHP 8.5 and Excimer 1.2.7. It records short single-worker comparisons
+with profiling off and on at the same load, including CPU per request,
+process RSS and latency.
 
 ## Development
 
