@@ -5,3 +5,4 @@
 /.phpstan.cache/
 /.phpunit.result.cache
 /build/
+/scripts/__pycache__/
