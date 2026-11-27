@@ -1,0 +1,20 @@
+{
+    "name": "tracewick/psr-15-swoole-example",
+    "description": "Coroutine HTTP worker example and smoke fixture for Tracewick PSR-15",
+    "type": "project",
+    "license": "Apache-2.0",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../..",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "require": {
+        "nyholm/psr7": "^1.8.2",
+        "tracewick/psr-15": "@dev",
+        "tracewick/tracewick": "1.0.0-rc.1"
+    }
+}

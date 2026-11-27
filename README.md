@@ -74,6 +74,29 @@ long-lived sequential worker, initialize the middleware and profiler once per
 worker after it starts. Concurrent runtimes need a process-level profiler and
 their own lifecycle wiring.
 
+### Swoole coroutine worker
+
+The [Swoole example](https://github.com/tracewick/psr-15/tree/develop/examples/swoole)
+starts a `ContinuousProfiler` once after each HTTP worker forks. The worker runs
+the PSR-15 handler as usual. All profiles carry the worker's configured process
+labels because overlapping coroutines share a sampler.
+
+After sending a response, the worker pulses at most once per second to send
+closed aggregation windows to the local spool. An idle worker leaves pending
+profiles for the next request or graceful shutdown. `WorkerStop` stops sampling
+and writes the remaining windows.
+
+From a Git checkout with Docker, PHP, Composer and `curl`, run the smoke test:
+
+```bash
+composer install --working-dir=examples/swoole
+bash examples/swoole/smoke.sh
+```
+
+The test builds Swoole 6.3.0 and Excimer 1.2.7 for PHP 8.5. It checks overlapping
+requests in one worker, samples from both handler stacks, closed-window delivery
+during requests, and the final spool write on graceful shutdown.
+
 ### RoadRunner
 
 The [sequential worker example](https://github.com/tracewick/psr-15/tree/develop/examples/roadrunner) creates one

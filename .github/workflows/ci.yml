@@ -105,6 +105,20 @@ jobs:
       - run: php --ri excimer
       - run: composer test:integration
 
+  swoole:
+    name: Swoole coroutine worker smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer:v2
+      - run: composer install --working-dir=examples/swoole --no-interaction --prefer-dist
+      - run: bash examples/swoole/smoke.sh
+
   roadrunner:
     name: RoadRunner worker smoke
     runs-on: ubuntu-latest
